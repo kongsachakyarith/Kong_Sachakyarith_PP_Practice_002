@@ -1,0 +1,24 @@
+version: "3.8"
+
+volumes:
+  cloud_data:
+
+services:
+  cloud-database:
+    image: postgres:14.4-alpine
+    healthcheck:
+      test: [ "CMD-SHELL","pg_isready","-U","cloudadmin" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    container_name: cloud-database
+    ports:
+      - "5555:5432"
+    environment:
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_DB: cloud_db
+      POSTGRES_USER: cloudadmin
+      POSTGRES_PASSWORD: secretpassword
+    volumes:
+      - cloud_data:/var/lib/postgresql/data
