@@ -5,11 +5,13 @@ import kotlin.random.Random
 
 data class CloudInstanceRequest(
     val instanceName: String,
-    val operatingSystemId: Long
+    val operatingSystemId: Long,
+    val appUser : String
 ){
     fun toEntity() = CloudInstance(
         instanceName = instanceName,
         operatingSystemId = operatingSystemId,
-        publicIpAddress = "${Random.nextInt(0,256)}.${Random.nextInt(0,256)}.${Random.nextInt(0,256)}.${Random.nextInt(0,256)}"
+        publicIpAddress = "${Random.nextInt(0,256)}.${Random.nextInt(0,256)}.${Random.nextInt(0,256)}.${Random.nextInt(0,256)}",
+        appUser = appUser,
     )
 }
