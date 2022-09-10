@@ -19,12 +19,12 @@ class OSHandler(val operatingSystemService: OperatingSystemService) {
             osRequestMono.flatMap {
                 operatingSystemService.save(it)
             }
-        return ServerResponse.ok().body(osResultMono, OperatingSystem::class.java)
+        return ServerResponse.ok().body(osResultMono, OperatingSystemDto::class.java)
     }
 
     fun findAllOS(req: ServerRequest): Mono<ServerResponse> =
         ServerResponse.ok().body(
             operatingSystemService.findAll(),
-            OperatingSystem::class.java
+            OperatingSystemDto::class.java
         )
 }

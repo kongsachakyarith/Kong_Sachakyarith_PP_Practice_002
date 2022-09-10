@@ -1,5 +1,5 @@
 spring:
   r2dbc:
-    url: r2dbc:pool:postgresql://localhost:5432/my_db
-    password: Rith1213
-    username: postgres
+    url: r2dbc:pool:postgresql://localhost:5432/cloud_db
+    password: secretpassword
+    username: cloudadmin

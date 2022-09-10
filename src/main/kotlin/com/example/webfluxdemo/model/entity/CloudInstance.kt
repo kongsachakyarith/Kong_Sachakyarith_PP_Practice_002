@@ -21,7 +21,7 @@ data class CloudInstance(
     val operatingSystemId: Long,
 
     @Column("user_id")
-    val appUser : String
+    val owner : String
 
 ) {
     fun toDto() = CloudInstanceDto(
@@ -29,7 +29,7 @@ data class CloudInstance(
         instanceName = instanceName,
         publicIpAddress = publicIpAddress,
         operatingSystem = null,
-        appUser = appUser
+       owner = null
     )
 }
 

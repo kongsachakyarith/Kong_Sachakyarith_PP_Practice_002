@@ -12,9 +12,10 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Service
-class  CloudInstanceServiceImpl(
+class CloudInstanceServiceImpl(
     val cloudInstanceRepository: CloudInstanceRepository,
     val operatingSystemRepository: OperatingSystemRepository,
+    @Qualifier("UserClient") val userClient: WebClient
 ) : CloudInstanceService {
     override fun create(cloudInstanceRequest: CloudInstanceRequest): Mono<CloudInstanceDto> {
         return cloudInstanceRepository
@@ -22,20 +23,23 @@ class  CloudInstanceServiceImpl(
             .map { res -> res.toDto() }
     }
 
-
-
     override fun findAll(): Flux<CloudInstanceDto> {
-        val cloudInstanceMono = cloudInstanceRepository
+        val cloudInstanceFlux = cloudInstanceRepository
             .findAll()
 
-        val osMono = cloudInstanceMono
+        val osFlux = cloudInstanceFlux
             .flatMap {
                 operatingSystemRepository.findById(it.operatingSystemId)
             }
 
+        val ownerIdFlux: Flux<String> = cloudInstanceFlux.map { it.owner }
 
+        fun findUserById(id: String): Mono<AppUser> = userClient.get()
+            .uri("/api/v1/users/{id}", id)
+            .retrieve()
+            .bodyToMono(AppUser::class.java)
 
-        return cloudInstanceMono.zipWith(osMono)
+        val cloudOsFlux = cloudInstanceFlux.zipWith(osFlux)
             .map {
                 val cloud = it.t1
                 val myos = it.t2
@@ -45,9 +49,24 @@ class  CloudInstanceServiceImpl(
 
                 cloudResponse
             }
+        return cloudOsFlux.zipWith(ownerIdFlux)
+            .flatMap {
+                val cloud = it.t1
+                val ownerId = it.t2
+                val owner = findUserById(ownerId)
+
+                Mono.just(cloud).zipWith(owner)
+                    .map { resultTup ->
+                        val clouds = resultTup.t1
+                        val ownerResult = resultTup.t2
+                        clouds.owner = ownerResult
+
+
+                        clouds
+                    }
+                    .log()
+            }
     }
-
-
 
 
 }
